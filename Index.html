@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><base target="_top"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Ticket Management</title><?!= include('Stylesheet'); ?></head>
+<body>
+<div class="app-container">
+<aside class="sidebar"><div class="sidebar-header"><div class="logo ticket-logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div><span class="logo-text">Tickets</span></div>
+<nav class="sidebar-nav">
+<button class="nav-item active" data-view="dashboard"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg><span>Dashboard</span></button>
+<button class="nav-item" data-view="tickets"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path></svg><span>All Tickets</span></button>
+<button class="nav-item" data-view="new-ticket"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg><span>New Ticket</span></button>
+</nav>
+<div class="sidebar-footer"><div class="user-info"><div class="user-avatar" id="userAvatar">U</div><div class="user-details"><span class="user-name" id="userName">Loading...</span><span class="user-role" id="userRole">-</span></div></div></div>
+</aside>
+<main class="main-content">
+<header class="top-bar"><h1 class="page-title" id="pageTitle">Dashboard</h1><button class="btn btn-primary" onclick="switchView('new-ticket')">+ New Ticket</button></header>
+<div class="content-area">
+<section class="view active" id="dashboardView">
+<div class="stats-row"><div class="stat-card"><div class="stat-icon primary"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path></svg></div><div><span class="stat-label">Total Tickets</span><span class="stat-value" id="statTotal">0</span></div></div><div class="stat-card"><div class="stat-icon warning"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div><div><span class="stat-label">Open</span><span class="stat-value" id="statOpen">0</span></div></div><div class="stat-card"><div class="stat-icon danger"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div><div><span class="stat-label">Overdue</span><span class="stat-value" id="statOverdue">0</span></div></div></div>
+<div class="tickets-preview" id="ticketsPreview"></div>
+</section>
+<section class="view" id="ticketsView"><div class="tickets-list" id="ticketsList"></div></section>
+<section class="view" id="newTicketView"><div class="form-card"><h2>Create Ticket</h2><form id="ticketForm"><div class="form-group"><label>Subject</label><input type="text" id="ticketSubject" required placeholder="Brief description of the issue"></div><div class="form-group"><label>Description</label><textarea id="ticketDescription" rows="4" required placeholder="Detailed description..."></textarea></div><div class="form-row"><div class="form-group"><label>Customer Email</label><input type="email" id="customerEmail"></div><div class="form-group"><label>Customer Name</label><input type="text" id="customerName"></div></div><div class="form-actions"><button type="submit" class="btn btn-primary">Create Ticket</button></div></form></div></section>
+</div>
+</main>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+<?!= include('JavaScript'); ?>
+</body>
+</html>
