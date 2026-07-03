@@ -2,6 +2,75 @@
  * Ticket Management System - Vendor/Customer Complaints
  */
 const CONFIG = { SHEET_NAMES: { USERS: 'Users', TICKETS: 'Tickets', TICKET_REPLIES: 'TicketReplies', CATEGORY_RULES: 'CategoryRules', SLA_CONFIG: 'SLAConfig', AUDIT_LOG: 'AuditLog' }, PRIORITIES: { LOW: 'Low', MEDIUM: 'Medium', HIGH: 'High', URGENT: 'Urgent' }, STATUS: { OPEN: 'Open', IN_PROGRESS: 'In Progress', PENDING_CUSTOMER: 'Pending Customer', RESOLVED: 'Resolved', CLOSED: 'Closed' }, CATEGORIES: ['Billing', 'Technical', 'Product Quality', 'Delivery', 'Service', 'General'] };
+const SHEET_CONFIG = const SHEET_CONFIG = {
+  Users: { columns: ['Email', 'Name', 'Role', 'Department', 'Active'] },
+  Tickets: { columns: ['TicketID', 'Subject', 'Description', 'Category', 'Priority', 'Status', 'CustomerEmail', 'CustomerName', 'AssignedTo', 'CreatedAt', 'UpdatedAt', 'ResolvedAt', 'SLADeadline'] },
+  TicketReplies: { columns: ['ReplyID', 'TicketID', 'FromEmail', 'FromName', 'Message', 'CreatedAt', 'Internal'] },
+  CategoryRules: { columns: ['RuleID', 'Keywords', 'Category', 'Priority', 'AutoAssign'] },
+  SLAConfig: { columns: ['Priority', 'ResponseHours', 'ResolutionHours'] },
+  AuditLog: { columns: ['Timestamp', 'User', 'Action', 'RecordID', 'OldValue', 'NewValue'] }
+};;
+
+// ============== ENHANCED UTILITIES (v2.0) ==============
+const VERSION = '2.0.0';
+
+function initializeSheets() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const created = [];
+  for (const [sheetName, config] of Object.entries(SHEET_CONFIG)) {
+    let sheet = ss.getSheetByName(sheetName);
+    if (!sheet) {
+      sheet = ss.insertSheet(sheetName);
+      created.push(sheetName);
+      sheet.getRange(1, 1, 1, config.columns.length).setValues([config.columns]).setFontWeight('bold');
+      sheet.setFrozenRows(1);
+      if (config.sampleData) config.sampleData.forEach(row => sheet.appendRow(row));
+    }
+  }
+  Logger.log('InitializeSheets: Created ' + created.join(', '));
+  return { created };
+}
+
+function handleError(error, context) {
+  const errorMsg = error instanceof Error ? error.message : String(error);
+  Logger.log('[ERROR] ' + context + ': ' + errorMsg);
+  if (typeof logAction === 'function') logAction('ERROR', context, '', errorMsg);
+  return { success: false, error: errorMsg };
+}
+
+function backupData() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const backupName = 'Backup_' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd_HH-mm');
+  ss.copy(backupName);
+  if (typeof logAction === 'function') logAction('BACKUP_CREATED', 'System', '', backupName);
+  return { success: true, backupName };
+}
+
+function exportToPDF(sheetName) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = sheetName ? ss.getSheetByName(sheetName) : ss.getActiveSheet();
+  const pdf = DriveApp.getFileById(ss.getId()).getAs('application/pdf');
+  const pdfName = sheet.getName() + '_' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd') + '.pdf';
+  DriveApp.getRootFolder().createFile(pdf).setName(pdfName);
+  return { success: true, fileName: pdfName };
+}
+
+function onOpen() {
+  const ui = SpreadsheetApp.getUi();
+  ui.createMenu('🎯 System Menu')
+    .addItem('📊 Initialize Sheets', 'initializeSheets')
+    .addItem('💾 Create Backup', 'backupData')
+    .addItem('📄 Export to PDF', 'exportToPDF')
+    .addSeparator()
+    .addItem('ℹ️ About', 'showAbout')
+    .addToUi();
+}
+
+function showAbout() {
+  const ui = SpreadsheetApp.getUi();
+  ui.alert('System v' + VERSION, 'Enhanced with:\n- initializeSheets()\n- backupData()\n- exportToPDF()', ui.ButtonSet.OK);
+}
+
 function getSheet(name) { const ss = SpreadsheetApp.getActiveSpreadsheet(); let sheet = ss.getSheetByName(name); if (!sheet) { sheet = ss.insertSheet(name); setupHeaders(sheet, name); } return sheet; }
 function setupHeaders(sheet, name) { const h = { Users: ['Email', 'Name', 'Role', 'Department', 'Active'], Tickets: ['TicketID', 'Subject', 'Description', 'Category', 'Priority', 'Status', 'CustomerEmail', 'CustomerName', 'AssignedTo', 'CreatedAt', 'UpdatedAt', 'ResolvedAt', 'SLADeadline'], TicketReplies: ['ReplyID', 'TicketID', 'FromEmail', 'FromName', 'Message', 'CreatedAt', 'Internal'], CategoryRules: ['RuleID', 'Keywords', 'Category', 'Priority', 'AutoAssign'], SLAConfig: ['Priority', 'ResponseHours', 'ResolutionHours'], AuditLog: ['Timestamp', 'User', 'Action', 'RecordID', 'OldValue', 'NewValue'] }; if (h[name]) { sheet.getRange(1, 1, 1, h[name].length).setValues([h[name]]); sheet.getRange(1, 1, 1, h[name].length).setFontWeight('bold'); } }
 function generateId(prefix) { return prefix + '-' + new Date().getFullYear() + '-' + Utilities.getUuid().substring(0, 6).toUpperCase(); }
